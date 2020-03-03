@@ -1,16 +1,54 @@
-"""Console script for ecs_connect."""
+""" Wrapper script for awscli which connects to containers running in ecs seamlessly """
 import sys
 import click
-
+import logging
+import os
+from ecs_connect.version import __version__
+from ecs_connect.config import ECSConfig
 
 @click.command()
-def main(args=None):
-    """Console script for ecs_connect."""
-    click.echo("Replace this message by putting your code into "
-               "ecs_connect.cli.main")
-    click.echo("See click documentation at https://click.palletsprojects.com/")
-    return 0
+@click.option('--profile', help="Name of the profile to use in .ecs-connect. \
+If none is provided, then the default profile will be used.\n")
+@click.option('--cluster', help="Name of the ECS cluster. \
+If provided, then the profile will be ignored.\n")
+@click.option('--service', help="Name of the service. \
+If provided, then the profile will be ignored.\n")
+@click.option('-V', '--version', is_flag=True, help='Displays version number\n')
+@click.option('-v', '--verbose', is_flag=True, help='Enables verbose mode')
+@click.option('-d', '--debug', is_flag=True, help='Enables debug mode')
+def main(profile, cluster, service, version, verbose, debug):
+    if version:
+        print(__version__)
+        exit(0)
+
+    # Set up logging
+    logger = logging.getLogger('ecs-connect')
+    logger.setLevel(logging.DEBUG)
+    handler = logging.StreamHandler()
+    handler.setLevel(logging.WARN)
+    formatter = logging.Formatter('%(levelname)s - %(message)s')
+    handler.setFormatter(formatter)
+    if verbose:
+        handler.setLevel(logging.INFO)
+    if debug:
+        handler.setLevel(logging.DEBUG)
+    logger.addHandler(handler)
+
+    if not profile:
+        profile = "default"
+
+    if cluster and not service:
+        logger.error("service parameter is missing.")
+    if not cluster and service:
+        logger.error("cluster parameter is missing.")
+
+    if not cluster and not service:
+        ecs_config = ECSConfig(logger)
+        cluster = ecs_config.get_cluster(profile)
+        service = ecs_config.get_service(profile)
+
+    print(cluster, service)
 
 
 if __name__ == "__main__":
-    sys.exit(main())  # pragma: no cover
+    main()
