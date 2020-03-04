@@ -9,24 +9,38 @@ ECS Connect
 .. image:: https://img.shields.io/travis/saurabhjambhule/ecs_connect.svg
         :target: https://travis-ci.com/saurabhjambhule/ecs_connect
 
-.. image:: https://readthedocs.org/projects/ecs-connect/badge/?version=latest
-        :target: https://ecs-connect.readthedocs.io/en/latest/?badge=latest
-        :alt: Documentation Status
-
 
 
 
 Seamlessly connect to containers running in ECS.
 
 
-* Free software: MIT license
-* Documentation: https://ecs-connect.readthedocs.io.
+Usage
+--------
+`ecs-connect --profile <profile> --cluster <cluster name> --service <service name> --cmd <init cmd>`
 
 
-Features
+Example
+--------
+`ecs-connect`
+
+If nothing is provided, then config will be pulled from default profile saved in ~/.ecs_connect config file.
+
+Optional flags:
+- `--profile` Name of the profile to use in ~/.ecs-connect. If none is provided, then the default profile will be used.
+- `--cluster` Name of the ECS cluster. If provided, then parameter from profile will be overridden.
+- `--service` Name of the service. If provided, then parameter from profile will be overridden.
+- `--cmd` Initilization command to run, will be executed once connected to container. If provided, then parameter from profile will be overridden.
+- `--all` Displays all running containers.
+- `--verbose` More verbose output.
+- `--debug` Very verbose output. Useful for debugging.
+
+
+Note
 --------
 
-* TODO
+* Set `cmd` to `sh` or `bash` depending on container os to get shell access.
+* <service name> will be used to filter containers.
 
 Credits
 -------

@@ -9,13 +9,13 @@ from ecs_connect.ssm import SSMHandler
 
 
 @click.command()
-@click.option('--profile', help="Name of the profile to use in .ecs-connect. \
+@click.option('--profile', help="Name of the profile to use in ~/.ecs-connect. \
 If none is provided, then the default profile will be used.\n")
 @click.option('--cluster', help="Name of the ECS cluster. \
 If provided, then parameter from profile will be overridden.\n")
 @click.option('--service', help="Name of the service. \
 If provided, then parameter from profile will be overridden.\n")
-@click.option('--cmd', help="initilization command to run. \
+@click.option('--cmd', help="Initilization command to run. \
 If provided, then parameter from profile will be overridden.\n")
 @click.option('-a', '--all', is_flag=True,
               help='Displays all running containers\n')
