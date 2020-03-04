@@ -12,13 +12,15 @@ from ecs_connect.ssm import SSMHandler
 @click.option('--profile', help="Name of the profile to use in .ecs-connect. \
 If none is provided, then the default profile will be used.\n")
 @click.option('--cluster', help="Name of the ECS cluster. \
-If provided, then the profile will be ignored.\n")
+If provided, then parameter from profile will be overridden.\n")
 @click.option('--service', help="Name of the service. \
-If provided, then the profile will be ignored.\n")
+If provided, then parameter from profile will be overridden.\n")
+@click.option('--cmd', help="initilization command to run. \
+If provided, then parameter from profile will be overridden.\n")
 @click.option('-V', '--version', is_flag=True, help='Displays version number\n')
 @click.option('-v', '--verbose', is_flag=True, help='Enables verbose mode')
 @click.option('-d', '--debug', is_flag=True, help='Enables debug mode')
-def main(profile, cluster, service, version, verbose, debug):
+def main(profile, cluster, service, cmd, version, verbose, debug):
     if version:
         print(__version__)
         exit(0)
@@ -36,25 +38,21 @@ def main(profile, cluster, service, version, verbose, debug):
         handler.setLevel(logging.DEBUG)
     logger.addHandler(handler)
 
+    ecs_config = ECSConfig(logger)
     if not profile:
         profile = "default"
-
-    if cluster and not service:
-        logger.error("service parameter is missing.")
-    if not cluster and service:
-        logger.error("cluster parameter is missing.")
-
-    if not cluster and not service:
-        ecs_config = ECSConfig(logger)
+    if not cluster:
         cluster = ecs_config.get_cluster(profile)
+    if not service:
         service = ecs_config.get_service(profile)
+    if not cmd:
         cmd = ecs_config.get_cmd(profile)
 
     ecs = ECSHandler(cluster, service, logger)
     instance_id = ecs.get_ec2_instance_id()
 
 
-    ssm = SSMHandler(instance_id, logger)
+    ssm = SSMHandler(instance_id, service, logger)
     ssm.run(cmd)
 
 if __name__ == "__main__":

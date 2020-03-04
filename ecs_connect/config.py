@@ -14,11 +14,23 @@ class ECSConfig():
     def get_cluster(self, profile):
         """ Gets ECS cluster from config """
         if self._value.has_option(profile, 'cluster'):
-            cluster = self._value.get(profile, 'cluster')
-            self.logger.info("Connecting to: %s cluster" % cluster)
+            if self._value.has_option(profile, 'cluster'):
+                cluster = self._value.get(profile, 'cluster')
+                self.logger.info("Connecting to: %s cluster" % cluster)
+            else:
+                self.logger.error(
+                    "No cluster parameter found"
+                )
+                exit(1)
         elif self._value.has_option('default', 'cluster'):
-            cluster = self._value.get('default', 'cluster')
-            self.logger.info("Using cluster from default profile %s" % cluster)
+            if self._value.has_option(profile, 'cluster'):
+                cluster = self._value.get('default', 'cluster')
+                self.logger.info("Using cluster from default profile %s" % cluster)
+            else:
+                self.logger.error(
+                    "No cluster parameter found"
+                )
+                exit(1)
         else:
             self.logger.error(
                 "No profile found. Please define a default profile, or specify a named profile using `--profile`"
@@ -33,15 +45,25 @@ class ECSConfig():
             service = self._value.get(profile, 'service')
         elif self._value.has_option('default', 'service'):
             service = self._value.get('default', 'service')
+        else:
+            self.logger.error(
+                "No service parameter found"
+            )
+            exit(1)
         self.logger.info("%s is selected for connection" % service)
         return service
 
     def get_cmd(self, profile):
         """ Gets init command from config """
-        service = None
+        cmd = None
         if self._value.has_option(profile, 'cmd'):
             cmd = self._value.get(profile, 'cmd')
         elif self._value.has_option('default', 'cmd'):
             cmd = self._value.get('default', 'cmd')
+        else:
+            self.logger.error(
+                "No cmd parameter found"
+            )
+            exit(1)
         self.logger.info("%s is selected as initilization command" % cmd)
         return cmd
