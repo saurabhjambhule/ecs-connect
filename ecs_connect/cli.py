@@ -1,12 +1,12 @@
-""" Wrapper script for awscli which connects to containers running in ecs seamlessly """
-import sys
+""" Wrapper script for awscli which connects to containers running in
+    ecs seamlessly """
 import click
 import logging
-import os
 from ecs_connect.version import __version__
 from ecs_connect.config import ECSConfig
 from ecs_connect.ecs import ECSHandler
 from ecs_connect.ssm import SSMHandler
+
 
 @click.command()
 @click.option('--profile', help="Name of the profile to use in .ecs-connect. \
@@ -17,8 +17,10 @@ If provided, then parameter from profile will be overridden.\n")
 If provided, then parameter from profile will be overridden.\n")
 @click.option('--cmd', help="initilization command to run. \
 If provided, then parameter from profile will be overridden.\n")
-@click.option('-a', '--all', is_flag=True, help='Displays all running containers\n')
-@click.option('-V', '--version', is_flag=True, help='Displays version number\n')
+@click.option('-a', '--all', is_flag=True,
+              help='Displays all running containers\n')
+@click.option('-V', '--version', is_flag=True,
+              help='Displays version number\n')
 @click.option('-v', '--verbose', is_flag=True, help='Enables verbose mode')
 @click.option('-d', '--debug', is_flag=True, help='Enables debug mode')
 def main(profile, cluster, service, cmd, all, version, verbose, debug):
@@ -52,9 +54,9 @@ def main(profile, cluster, service, cmd, all, version, verbose, debug):
     ecs = ECSHandler(cluster, service, logger)
     instance_id = ecs.get_ec2_instance_id()
 
-
     ssm = SSMHandler(instance_id, service, logger)
     ssm.run(cmd, all)
+
 
 if __name__ == "__main__":
     main()

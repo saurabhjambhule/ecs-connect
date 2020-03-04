@@ -2,7 +2,24 @@
 
 """The setup script."""
 
+import os
+import codecs
+import re
 from setuptools import setup, find_packages
+
+HERE = os.path.abspath(os.path.dirname(__file__))
+
+def read(*parts):
+    with codecs.open(os.path.join(HERE, *parts), 'r') as fp:
+        return fp.read()
+
+def find_version(*file_paths):
+    version_file = read(*file_paths)
+    version_match = re.search(r"^__version__ = ['\"]([^'\"]*)['\"]",
+                              version_file, re.M)
+    if version_match:
+        return version_match.group(1)
+    raise RuntimeError("Unable to find version string.")
 
 with open('README.rst') as readme_file:
     readme = readme_file.read()
@@ -10,11 +27,12 @@ with open('README.rst') as readme_file:
 with open('HISTORY.rst') as history_file:
     history = history_file.read()
 
-requirements = ['Click>=7.0', ]
+with open(os.path.join(HERE, "requirements.txt"), "r") as fh:
+    INSTALL_REQUIRES = [line.strip() for line in fh]
 
-setup_requirements = [ ]
+with open(os.path.join(HERE, "requirements_dev.txt"), "r") as fh:
+    SETUP_REQUIRES = [line.strip() for line in fh]
 
-test_requirements = [ ]
 
 setup(
     author="Saurabh Jambhule",
@@ -37,17 +55,19 @@ setup(
             'ecs_connect=ecs_connect.cli:main',
         ],
     },
-    install_requires=requirements,
+    install_requires=INSTALL_REQUIRES,
     license="MIT license",
     long_description=readme + '\n\n' + history,
     include_package_data=True,
-    keywords='ecs_connect',
+    keywords=[
+        "ecs_connect",
+        "ecs",
+    ],
     name='ecs_connect',
     packages=find_packages(include=['ecs_connect', 'ecs_connect.*']),
-    setup_requires=setup_requirements,
-    test_suite='tests',
-    tests_require=test_requirements,
+    setup_requires=SETUP_REQUIRES,
     url='https://github.com/saurabhjambhule/ecs_connect',
-    version='0.1.0',
+    version=find_version("ecs_connect/version.py"),
+    test_suite='tests',
     zip_safe=False,
 )

@@ -3,6 +3,7 @@
 import os
 from configparser import RawConfigParser
 
+
 class ECSConfig():
     """ Config handler class """
     def __init__(self, logger):
@@ -25,7 +26,8 @@ class ECSConfig():
         elif self._value.has_option('default', 'cluster'):
             if self._value.has_option(profile, 'cluster'):
                 cluster = self._value.get('default', 'cluster')
-                self.logger.info("Using cluster from default profile %s" % cluster)
+                self.logger.info("Using cluster from default profile %s"
+                                 % cluster)
             else:
                 self.logger.error(
                     "No cluster parameter found"
@@ -33,7 +35,8 @@ class ECSConfig():
                 exit(1)
         else:
             self.logger.error(
-                "No profile found. Please define a default profile, or specify a named profile using `--profile`"
+                "No profile found. Please define a default profile, \
+                or specify a named profile using `--profile`"
             )
             exit(1)
         return cluster

@@ -1,8 +1,7 @@
 """Main module."""
 
-import os
 import boto3
-from botocore.exceptions import ClientError
+
 
 class ECSHandler():
     """ ECS handler  """

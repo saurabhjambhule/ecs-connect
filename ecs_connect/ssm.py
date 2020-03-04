@@ -1,9 +1,9 @@
 """Main module."""
 
-import os
 import boto3
 import subprocess
 import time
+
 
 class SSMHandler():
     """ SSM handler  """
@@ -36,7 +36,8 @@ class SSMHandler():
         running_container = output['StandardOutputContent'].count('\n') - 1
         if running_container <= 0:
             self.logger.error("No container running with name %s.\
-                \nUse --all/-a to display all running container.", self.service)
+                \nUse --all/-a to display all running container.",
+                              self.service)
             exit(1)
 
         if running_container == 1:
@@ -50,11 +51,11 @@ class SSMHandler():
 
     def start_session(self, container_id, exec_cmd):
         command = f'aws ssm start-session --target {self.ec2_id} \
-            --document-name AWS-StartInteractiveCommand \
-            --parameters command="sudo docker exec -it {container_id} {exec_cmd}"'
+        --document-name AWS-StartInteractiveCommand \
+        --parameters command="sudo docker exec -it {container_id} {exec_cmd}"'
         self.logger.info("Running: %s", command)
 
-        returned_value = subprocess.call(command, shell=True)
+        subprocess.call(command, shell=True)
 
     def run(self, exec_cmd, all):
         container_id = self.get_conatiners(all)
