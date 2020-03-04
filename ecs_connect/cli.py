@@ -5,6 +5,8 @@ import logging
 import os
 from ecs_connect.version import __version__
 from ecs_connect.config import ECSConfig
+from ecs_connect.ecs import ECSHandler
+from ecs_connect.ssm import SSMHandler
 
 @click.command()
 @click.option('--profile', help="Name of the profile to use in .ecs-connect. \
@@ -46,9 +48,14 @@ def main(profile, cluster, service, version, verbose, debug):
         ecs_config = ECSConfig(logger)
         cluster = ecs_config.get_cluster(profile)
         service = ecs_config.get_service(profile)
+        cmd = ecs_config.get_cmd(profile)
 
-    print(cluster, service)
+    ecs = ECSHandler(cluster, service, logger)
+    instance_id = ecs.get_ec2_instance_id()
 
+
+    ssm = SSMHandler(instance_id, logger)
+    ssm.run(cmd)
 
 if __name__ == "__main__":
     main()

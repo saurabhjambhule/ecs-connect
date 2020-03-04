@@ -9,7 +9,6 @@ class ECSConfig():
         self.logger = logger
         self.config_path = os.path.expanduser('~') + '/.ecs_connect'
         self._value = RawConfigParser()
-        print(self.config_path)
         self._value.read(self.config_path)
 
     def get_cluster(self, profile):
@@ -36,3 +35,13 @@ class ECSConfig():
             service = self._value.get('default', 'service')
         self.logger.info("%s is selected for connection" % service)
         return service
+
+    def get_cmd(self, profile):
+        """ Gets init command from config """
+        service = None
+        if self._value.has_option(profile, 'cmd'):
+            cmd = self._value.get(profile, 'cmd')
+        elif self._value.has_option('default', 'cmd'):
+            cmd = self._value.get('default', 'cmd')
+        self.logger.info("%s is selected as initilization command" % cmd)
+        return cmd
