@@ -2,10 +2,10 @@
     ecs seamlessly """
 import click
 import logging
-from ecs_connect.version import __version__
-from ecs_connect.config import ECSConfig
-from ecs_connect.ecs import ECSHandler
-from ecs_connect.ssm import SSMHandler
+from version import __version__
+from config import ECSConfig
+from ecs import ECSHandler
+from ssm import SSMHandler
 
 
 @click.command()
@@ -54,8 +54,8 @@ def main(profile, cluster, service, cmd, all, version, verbose, debug):
     ecs = ECSHandler(cluster, service, logger)
     instance_id = ecs.get_ec2_instance_id()
 
-    ssm = SSMHandler(instance_id, service, logger)
-    ssm.run(cmd, all)
+    #ssm = SSMHandler(instance_id, service, logger)
+    #ssm.run(cmd, all)
 
 
 if __name__ == "__main__":
