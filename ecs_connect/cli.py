@@ -15,6 +15,9 @@ If none is provided, then the default profile will be used.\n")
 If provided, then parameter from profile will be overridden.\n")
 @click.option('--service', help="Name of the service. \
 If provided, then parameter from profile will be overridden.\n")
+@click.option('--bastion', help="Instance Id of the bastion node, \
+required for task running in FARGATE. \
+If provided, then parameter from profile will be overridden.\n")
 @click.option('--cmd', help="Initilization command to run. \
 If provided, then parameter from profile will be overridden.\n")
 @click.option('-a', '--all', is_flag=True,
@@ -23,7 +26,7 @@ If provided, then parameter from profile will be overridden.\n")
               help='Displays version number\n')
 @click.option('-v', '--verbose', is_flag=True, help='Enables verbose mode')
 @click.option('-d', '--debug', is_flag=True, help='Enables debug mode')
-def main(profile, cluster, service, cmd, all, version, verbose, debug):
+def main(profile, cluster, service, bastion, cmd, all, version, verbose, debug):
     if version:
         print(__version__)
         exit(0)
@@ -48,14 +51,18 @@ def main(profile, cluster, service, cmd, all, version, verbose, debug):
         cluster = ecs_config.get_cluster(profile)
     if not service:
         service = ecs_config.get_service(profile)
+    if not bastion:
+        bastion = ecs_config.get_bastion(profile)
     if not cmd:
         cmd = ecs_config.get_cmd(profile)
 
-    ecs = ECSHandler(cluster, service, logger)
-    instance_id = ecs.get_ec2_instance_id()
+    ecs = ECSHandler(cluster, service, bastion, logger)
+    instance_id, bastion_enabled = ecs.get_ec2_instance_id()
 
-    #ssm = SSMHandler(instance_id, service, logger)
-    #ssm.run(cmd, all)
+    print(instance_id, bastion_enabled, bastion)
+
+    # ssm = SSMHandler(instance_id, service, bastion_enabled, logger)
+    # ssm.run(cmd, all)
 
 
 if __name__ == "__main__":

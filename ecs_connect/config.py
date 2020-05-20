@@ -23,16 +23,6 @@ class ECSConfig():
                     "No cluster parameter found"
                 )
                 exit(1)
-        elif self._value.has_option('default', 'cluster'):
-            if self._value.has_option(profile, 'cluster'):
-                cluster = self._value.get('default', 'cluster')
-                self.logger.info("Using cluster from default profile %s"
-                                 % cluster)
-            else:
-                self.logger.error(
-                    "No cluster parameter found"
-                )
-                exit(1)
         else:
             self.logger.error(
                 "No profile found. Please define a default profile, \
@@ -46,8 +36,6 @@ class ECSConfig():
         service = None
         if self._value.has_option(profile, 'service'):
             service = self._value.get(profile, 'service')
-        elif self._value.has_option('default', 'service'):
-            service = self._value.get('default', 'service')
         else:
             self.logger.error(
                 "No service parameter found"
@@ -56,13 +44,22 @@ class ECSConfig():
         self.logger.info("%s is selected for connection" % service)
         return service
 
+    def get_bastion(self, profile):
+        """ Gets bastion node id from config """
+        bastion = None
+        if self._value.has_option(profile, 'bastion'):
+            bastion = self._value.get(profile, 'bastion')
+        else:
+            self.logger.info("No bastion parameter found")
+            return bastion
+        self.logger.info("%s is selected as bastion node" % bastion)
+        return bastion
+
     def get_cmd(self, profile):
         """ Gets init command from config """
         cmd = None
         if self._value.has_option(profile, 'cmd'):
             cmd = self._value.get(profile, 'cmd')
-        elif self._value.has_option('default', 'cmd'):
-            cmd = self._value.get('default', 'cmd')
         else:
             self.logger.error(
                 "No cmd parameter found"

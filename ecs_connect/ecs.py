@@ -5,9 +5,10 @@ import boto3
 
 class ECSHandler():
     """ ECS handler  """
-    def __init__(self, cluster, service, logger):
+    def __init__(self, cluster, service, bastion, logger):
         self.cluster = cluster
         self.service = service
+        self.bastion = bastion
         self.logger = logger
         self.ecs_client = boto3.client('ecs')
 
@@ -17,6 +18,13 @@ class ECSHandler():
             serviceName=self.service,
             desiredStatus='RUNNING'
         )
+        if response['taskArns'] == []:
+            self.logger.error(
+                "No task running for <%s> service in <%s> cluster", self.service,
+                 self.cluster
+            )
+            exit(1)
+
         self.logger.info("Retrived task id using service and cluster name: %s"
                          % response['taskArns'][0])
         return response['taskArns'][0]
@@ -29,12 +37,27 @@ class ECSHandler():
                 task_id,
             ]
         )
+
+        if response['tasks'][0]['launchType'] == 'FARGATE':
+            if self.bastion == None:
+                self.logger.error(
+                    "Bastion node rquired for task running in FARGATE"
+                )
+                exit(1)
+
+            return response['tasks'][0]['containers'][0]['networkInterfaces'][0]['privateIpv4Address'], 'FARGATE'
+
         self.logger.info("Retrived ecs container instance id using task id: %s"
                          % response['tasks'][0]['containerInstanceArn'])
-        return response['tasks'][0]['containerInstanceArn']
+        return response['tasks'][0]['containerInstanceArn'], 'EC2'
 
     def get_ec2_instance_id(self):
-        container_instance_id = self.get_container_instance_id()
+        container_instance_id, platform = self.get_container_instance_id()
+
+        if platform == 'FARGATE':
+            self.logger.info("Task is running in FARGATE, connecting using \
+                            bastion node: %s" % self.bastion)
+            return container_instance_id, True
 
         response = self.ecs_client.describe_container_instances(
             cluster=self.cluster,
@@ -44,4 +67,4 @@ class ECSHandler():
         )
         self.logger.info("Retrived ec2 instance id using container \
         instance id: %s" % response['containerInstances'][0]['ec2InstanceId'])
-        return response['containerInstances'][0]['ec2InstanceId']
+        return response['containerInstances'][0]['ec2InstanceId'], False
