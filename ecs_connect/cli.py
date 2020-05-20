@@ -59,10 +59,8 @@ def main(profile, cluster, service, bastion, cmd, all, version, verbose, debug):
     ecs = ECSHandler(cluster, service, bastion, logger)
     instance_id, bastion_enabled = ecs.get_ec2_instance_id()
 
-    print(instance_id, bastion_enabled, bastion)
-
-    # ssm = SSMHandler(instance_id, service, bastion_enabled, logger)
-    # ssm.run(cmd, all)
+    ssm = SSMHandler(instance_id, service, bastion_enabled, bastion, logger)
+    ssm.run(cmd, all)
 
 
 if __name__ == "__main__":

@@ -20,6 +20,10 @@ Usage
 ``ecs-connect --profile <profile> --cluster <cluster name> --service <service name> --cmd <init cmd>``
 
 
+Requirements
+--------
+
+
 Example
 --------
 ``ecs-connect``

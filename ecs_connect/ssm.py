@@ -7,9 +7,11 @@ import time
 
 class SSMHandler():
     """ SSM handler  """
-    def __init__(self, ec2_id, service, logger):
+    def __init__(self, ec2_id, service, bastion_enabled, bastion_id, logger):
         self.ec2_id = ec2_id
         self.service = service
+        self.bastion_enabled = bastion_enabled
+        self.bastion_id = bastion_id
         self.logger = logger
         self.ssm_client = boto3.client('ssm')
 
@@ -57,6 +59,23 @@ class SSMHandler():
 
         subprocess.call(command, shell=True)
 
-    def run(self, exec_cmd, all):
+    def start_bastion_session(self, exec_cmd):
+        command = f'aws ssm start-session --target {self.bastion_id} \
+        --document-name AWS-StartInteractiveCommand \
+        --parameters command="ssh -i /home/ssm-user/bastion root@{self.ec2_id}"'
+        self.logger.info("Running: %s", command)
+
+        subprocess.call(command, shell=True)
+
+    def run_directly(self, exec_cmd, all):
         container_id = self.get_conatiners(all)
         self.start_session(container_id, exec_cmd)
+
+    def run_through_bastion(self, exec_cmd, all):
+        self.start_bastion_session(exec_cmd)
+
+    def run(self, exec_cmd, all):
+        if self.bastion_enabled:
+            self.run_through_bastion(exec_cmd, all)
+        else:
+            self.run_directly(exec_cmd, all)
