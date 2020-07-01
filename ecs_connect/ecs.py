@@ -5,29 +5,44 @@ import boto3
 
 class ECSHandler():
     """ ECS handler  """
-    def __init__(self, cluster, service, bastion, logger):
+    def __init__(self, cluster, service, task, bastion, logger):
         self.cluster = cluster
         self.service = service
+        self.task = task
         self.bastion = bastion
         self.logger = logger
         self.ecs_client = boto3.client('ecs')
 
     def get_task_id(self):
-        response = self.ecs_client.list_tasks(
-            cluster=self.cluster,
-            serviceName=self.service,
-            desiredStatus='RUNNING'
-        )
-        if response['taskArns'] == []:
-            self.logger.error(
-                "No task running for <%s> service in <%s> cluster", self.service,
-                 self.cluster
+        taskId = None
+        if self.task:
+            response = self.ecs_client.list_tasks(
+                cluster=self.cluster,
+                startedBy=self.task,
+                desiredStatus='RUNNING'
             )
-            exit(1)
+            self.logger.info("Retrived task id using task and cluster name: %s"
+                             % response['taskArns'][0])
+            taskId = response['taskArns'][0]
+        else:
+            response = self.ecs_client.list_tasks(
+                cluster=self.cluster,
+                serviceName=self.service,
+                desiredStatus='RUNNING'
+            )
+            if response['taskArns'] == []:
+                self.logger.error(
+                    "No task running for <%s> service in <%s> cluster", self.service,
+                     self.cluster
+                )
+                exit(1)
 
-        self.logger.info("Retrived task id using service and cluster name: %s"
-                         % response['taskArns'][0])
-        return response['taskArns'][0]
+            ### todo: address multiple task running for single service
+            self.logger.info("Retrived task id using service and cluster name: %s"
+                             % response['taskArns'][0])
+            taskId = response['taskArns'][0]
+
+        return taskId
 
     def get_container_instance_id(self):
         task_id = self.get_task_id()

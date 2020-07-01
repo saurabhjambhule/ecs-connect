@@ -44,6 +44,18 @@ class ECSConfig():
         self.logger.info("%s is selected for connection" % service)
         return service
 
+    def get_task(self, profile):
+        """ Gets service from config """
+        task = None
+        if self._value.has_option(profile, 'task'):
+            task = self._value.get(profile, 'task')
+        else:
+            self.logger.info("No task provided for connection" % task)
+            return task
+
+        self.logger.info("%s is selected for connection" % task)
+        return task
+
     def get_bastion(self, profile):
         """ Gets bastion node id from config """
         bastion = None
