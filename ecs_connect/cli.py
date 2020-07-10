@@ -2,10 +2,10 @@
     ecs seamlessly """
 import click
 import logging
-from version import __version__
-from config import ECSConfig
-from ecs import ECSHandler
-from ssm import SSMHandler
+from ecs_connect.version import __version__
+from ecs_connect.config import ECSConfig
+from ecs_connect.ecs import ECSHandler
+from ecs_connect.ssm import SSMHandler
 
 
 @click.command()
