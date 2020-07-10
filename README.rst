@@ -33,10 +33,11 @@ If nothing is provided, then config will be pulled from default profile saved in
 Optional flags:
 
 * **--profile** Name of the profile to use in ~/.ecs-connect. If none is provided, then the default profile will be used.
-* **--cluster** Name of the ECS cluster. If provided, then parameter from profile will be overridden.
-* **--service** Name of the service. If provided, then parameter from profile will be overridden.
+* **--cluster** Name of the ECS cluster.
+* **--service** Name of the service.
+* **--task** Started by name. If provided, the service will be ignored.
 * **--cmd** Initilization command to run, will be executed once connected to container. If provided, then parameter from profile will be overridden.
-* **--all** Displays all running containers.
+* **--all** Displays all running containers, for ECS EC2 based running tasks/services.
 * **--verbose** More verbose output.
 * **--debug** Very verbose output. Useful for debugging.
 
