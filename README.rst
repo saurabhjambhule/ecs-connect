@@ -25,12 +25,12 @@ Also, the SSHD must be installed on the container to which you want to connect. 
 
 Usage
 --------
-``ecs-connect --profile <profile> --cluster <cluster name> --service <service name> --cmd <init cmd>``
+``ecs_connect --profile <profile> --cluster <cluster name> --service <service name> --cmd <init cmd>``
 
 
 Example
 --------
-``ecs-connect``
+``ecs_connect``
 
 If nothing is provided, then config will be pulled from default profile saved in ~/.ecs_connect config file.
 

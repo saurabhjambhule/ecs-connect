@@ -6,3 +6,8 @@ History
 ------------------
 
 * First release on PyPI.
+
+1.2.0 (2020-06-10)
+------------------
+
+* Added support for referencing task using started by value
