@@ -11,3 +11,8 @@ History
 ------------------
 
 * Added support for referencing task using started by value
+
+1.2.3 (2020-09-09)
+------------------
+
+* Make task parameter optional for service based deploys
