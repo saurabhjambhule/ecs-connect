@@ -49,11 +49,8 @@ class ECSConfig():
         task = None
         if self._value.has_option(profile, 'task'):
             task = self._value.get(profile, 'task')
-        else:
-            self.logger.info("No task provided for connection" % task)
-            return task
 
-        self.logger.info("%s is selected for connection" % task)
+        self.logger.info("%s is selected as task" % task)
         return task
 
     def get_bastion(self, profile):
@@ -61,9 +58,7 @@ class ECSConfig():
         bastion = None
         if self._value.has_option(profile, 'bastion'):
             bastion = self._value.get(profile, 'bastion')
-        else:
-            self.logger.info("No bastion parameter found")
-            return bastion
+
         self.logger.info("%s is selected as bastion node" % bastion)
         return bastion
 
