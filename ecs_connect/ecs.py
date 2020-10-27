@@ -1,17 +1,20 @@
 """Main module."""
 
 import boto3
+import boto3.session
 
 
 class ECSHandler():
     """ ECS handler  """
-    def __init__(self, cluster, service, task, bastion, logger):
+    def __init__(self, session, cluster, service, task, bastion, logger):
         self.cluster = cluster
         self.service = service
         self.task = task
         self.bastion = bastion
         self.logger = logger
-        self.ecs_client = boto3.client('ecs')
+
+        self.session = session
+        self.ecs_client = self.session.client('ecs')
 
     def get_task_id(self):
         taskId = None

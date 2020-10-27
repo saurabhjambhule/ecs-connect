@@ -16,3 +16,8 @@ History
 ------------------
 
 * Make task parameter optional for service based deploys
+
+1.3.0 (2020-10-22)
+------------------
+
+* Add support login through sso user

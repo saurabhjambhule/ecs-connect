@@ -1,19 +1,22 @@
 """Main module."""
 
 import boto3
+import boto3.session
 import subprocess
 import time
 
 
 class SSMHandler():
     """ SSM handler  """
-    def __init__(self, ec2_id, service, bastion_enabled, bastion_id, logger):
+    def __init__(self, session, ec2_id, service, bastion_enabled, bastion_id, logger):
         self.ec2_id = ec2_id
         self.service = service
         self.bastion_enabled = bastion_enabled
         self.bastion_id = bastion_id
         self.logger = logger
-        self.ssm_client = boto3.client('ssm')
+
+        self.session = session
+        self.ssm_client = self.session.client('ssm')
 
     def get_conatiners(self, all):
         if all:
