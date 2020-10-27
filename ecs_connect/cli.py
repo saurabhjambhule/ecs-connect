@@ -72,7 +72,7 @@ def main(profile, awsprofile, cluster, nosso, service, task, bastion, cmd, all, 
     if not cmd:
         cmd = ecs_config.get_cmd(profile)
 
-    session = auth(awsprofile, nosso)
+    session = auth(awsprofile, nosso, logger)
 
     ecs = ECSHandler(session, cluster, service, task, bastion, logger)
     instance_id, bastion_enabled = ecs.get_ec2_instance_id()
@@ -80,7 +80,7 @@ def main(profile, awsprofile, cluster, nosso, service, task, bastion, cmd, all, 
     ssm = SSMHandler(session, instance_id, service, bastion_enabled, bastion, logger)
     ssm.run(cmd, all)
 
-def auth(awsprofile, nosso):
+def auth(awsprofile, nosso, logger):
     if nosso:
         session = boto3.Session(profile_name=awsprofile)
         return session
@@ -105,11 +105,18 @@ def auth(awsprofile, nosso):
                 accessToken = data['accessToken']
 
     client = boto3.client('sso', region_name=region)
-    response = client.get_role_credentials(
-        roleName=role_name,
-        accountId=account_id,
-        accessToken=accessToken
-    )
+
+    try:
+        response = client.get_role_credentials(
+            roleName=role_name,
+            accountId=account_id,
+            accessToken=accessToken
+        )
+    except:
+        logger.error(
+            "SSO session expired!"
+        )
+        exit(1)
 
     session = boto3.Session(aws_access_key_id=response['roleCredentials']['accessKeyId'], aws_secret_access_key=response['roleCredentials']['secretAccessKey'], aws_session_token=response['roleCredentials']['sessionToken'], region_name=region)
     return session

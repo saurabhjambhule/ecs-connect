@@ -20,4 +20,9 @@ History
 1.3.0 (2020-10-22)
 ------------------
 
-* Add support login through sso user
+* Add support for authentication through aws sso
+
+1.3.1 (2020-10-27)
+------------------
+
+* Add error logging for expired sso session
