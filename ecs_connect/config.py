@@ -31,6 +31,16 @@ class ECSConfig():
             exit(1)
         return cluster
 
+    def get_awsprofile(self, profile):
+        """ Gets AWS profile from config """
+        awsprofile = None
+        if self._value.has_option(profile, 'awsprofile'):
+            awsprofile = self._value.get(profile, 'awsprofile')
+        else:
+            awsprofile = "default"
+        self.logger.info("%s is selected as awsprofile" % awsprofile)
+        return awsprofile
+
     def get_service(self, profile):
         """ Gets service from config """
         service = None

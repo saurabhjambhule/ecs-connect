@@ -7,13 +7,15 @@ import time
 
 class SSMHandler():
     """ SSM handler  """
-    def __init__(self, ec2_id, service, bastion_enabled, bastion_id, logger):
+    def __init__(self, awsprofile, ec2_id, service, bastion_enabled, bastion_id, logger):
+        self.awsprofile = awsprofile
         self.ec2_id = ec2_id
         self.service = service
         self.bastion_enabled = bastion_enabled
         self.bastion_id = bastion_id
         self.logger = logger
-        self.ssm_client = boto3.client('ssm')
+
+        self.ssm_client = boto3.session.Session(profile_name=self.awsprofile).client('ssm')
 
     def get_conatiners(self, all):
         if all:
@@ -52,7 +54,7 @@ class SSMHandler():
         return container_id
 
     def start_session(self, container_id, exec_cmd):
-        command = f'aws ssm start-session --target {self.ec2_id} \
+        command = f'aws --profile {self.awsprofile} ssm start-session --target {self.ec2_id} \
         --document-name AWS-StartInteractiveCommand \
         --parameters command="sudo docker exec -it {container_id} {exec_cmd}"'
         self.logger.info("Running: %s", command)
@@ -60,7 +62,7 @@ class SSMHandler():
         subprocess.call(command, shell=True)
 
     def start_bastion_session(self, exec_cmd):
-        command = f'aws ssm start-session --target {self.bastion_id} \
+        command = f'aws --profile {self.awsprofile} ssm start-session --target {self.bastion_id} \
         --document-name AWS-StartInteractiveCommand \
         --parameters command="ssh -i /home/ssm-user/bastion root@{self.ec2_id}"'
         self.logger.info("Running: %s", command)

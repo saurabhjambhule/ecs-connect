@@ -5,13 +5,15 @@ import boto3
 
 class ECSHandler():
     """ ECS handler  """
-    def __init__(self, cluster, service, task, bastion, logger):
+    def __init__(self, awsprofile, cluster, service, task, bastion, logger):
+        self.awsprofile = awsprofile
         self.cluster = cluster
         self.service = service
         self.task = task
         self.bastion = bastion
         self.logger = logger
-        self.ecs_client = boto3.client('ecs')
+
+        self.ecs_client = boto3.session.Session(profile_name=self.awsprofile).client('ecs')
 
     def get_task_id(self):
         taskId = None

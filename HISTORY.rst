@@ -16,3 +16,8 @@ History
 ------------------
 
 * Make task parameter optional for service based deploys
+
+2.0.0 (2020-10-22)
+------------------
+
+* Add support for selecting aws profile
