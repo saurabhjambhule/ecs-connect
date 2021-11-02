@@ -84,3 +84,27 @@ class ECSConfig():
             exit(1)
         self.logger.info("%s is selected as initilization command" % cmd)
         return cmd
+
+    def get_ssh_user(self, profile):
+        """ Gets ssh user name from config """
+        ssh_user = 'root'
+        if self._value.has_option(profile, 'ssh_user'):
+            ssh_user = self._value.get(profile, 'ssh_user')
+        self.logger.info("%s is selected as a ssh user" % ssh_user)
+        return ssh_user
+
+    def get_ssh_key(self, profile):
+        """ Gets ssh key path from config """
+        ssh_key = '/home/ssm-user/bastion'
+        if self._value.has_option(profile, 'ssh_key'):
+            ssh_key = self._value.get(profile, 'ssh_key')
+        self.logger.info("%s is selected as a ssh user" % ssh_key)
+        return ssh_key
+
+    def get_ssh_port(self, profile):
+        """ Gets ssh key path from config """
+        ssh_port = '22'
+        if self._value.has_option(profile, 'ssh_port'):
+            ssh_port = self._value.get(profile, 'ssh_port')
+        self.logger.info("%s is selected as a ssh port" % ssh_port)
+        return ssh_port

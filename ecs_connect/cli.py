@@ -66,11 +66,14 @@ def main(profile, awsprofile, cluster, service, task, bastion, cmd, all, version
         bastion = ecs_config.get_bastion(profile)
     if not cmd:
         cmd = ecs_config.get_cmd(profile)
+    ssh_user = ecs_config.get_ssh_user(profile)
+    ssh_key = ecs_config.get_ssh_key(profile)
+    ssh_port = ecs_config.get_ssh_port(profile)
 
     ecs = ECSHandler(awsprofile, cluster, service, task, bastion, logger)
     instance_id, bastion_enabled = ecs.get_ec2_instance_id()
 
-    ssm = SSMHandler(awsprofile, instance_id, service, bastion_enabled, bastion, logger)
+    ssm = SSMHandler(awsprofile, instance_id, service, bastion_enabled, bastion, ssh_user, ssh_key, ssh_port, logger)
     ssm.run(cmd, all)
 
 

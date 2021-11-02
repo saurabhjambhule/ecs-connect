@@ -45,6 +45,9 @@ Optional flags:
 * **--verbose** More verbose output.
 * **--debug** Very verbose output. Useful for debugging.
 
+Additional options available in only config file:
+* **--ssh_user** User name for ssh into fargate based service.
+* **--ssh_key** SSH key path on bastion node.
 
 Note
 --------

@@ -21,3 +21,8 @@ History
 ------------------
 
 * Add support for selecting aws profile
+
+2.0.1 (2021-10-28)
+------------------
+
+* Add support for specifying ssh user and path of the ssh key in bastion node
