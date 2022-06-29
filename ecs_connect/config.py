@@ -54,14 +54,37 @@ class ECSConfig():
         self.logger.info("%s is selected for connection" % service)
         return service
 
+    def get_exec_cmd(self, profile):
+        """ Gets task from config """
+        exec_cmd = None
+        if self._value.has_option(profile, 'exec_cmd'):
+            exec_cmd = self._value.get(profile, 'exec_cmd')
+
+        self.logger.info("%s is selected as exec cmd" % exec_cmd)
+        return exec_cmd
+
     def get_task(self, profile):
-        """ Gets service from config """
+        """ Gets task from config """
         task = None
         if self._value.has_option(profile, 'task'):
             task = self._value.get(profile, 'task')
 
         self.logger.info("%s is selected as task" % task)
         return task
+
+    def get_container(self, profile, exec_cmd):
+        """ Gets container name from config """
+        container = None
+        if self._value.has_option(profile, 'container'):
+            container = self._value.get(profile, 'container')
+        elif exec_cmd is not None:
+            self.logger.error(
+                "No container parameter found"
+            )
+            exit(1)
+
+        self.logger.info("%s is selected as container" % container)
+        return container
 
     def get_bastion(self, profile):
         """ Gets bastion node id from config """
@@ -72,12 +95,12 @@ class ECSConfig():
         self.logger.info("%s is selected as bastion node" % bastion)
         return bastion
 
-    def get_cmd(self, profile):
+    def get_cmd(self, profile, exec_cmd):
         """ Gets init command from config """
         cmd = None
         if self._value.has_option(profile, 'cmd'):
             cmd = self._value.get(profile, 'cmd')
-        else:
+        elif exec_cmd is None:
             self.logger.error(
                 "No cmd parameter found"
             )

@@ -19,6 +19,10 @@ If provided, then parameter from profile will be overridden.\n")
 If provided, then parameter from profile will be overridden.\n")
 @click.option('--task', help="Name of the task. \
 If provided, then parameter from profile will be overridden.\n")
+@click.option('--exec_cmd', help="Initilization command to run with ecs exec. \
+If provided, then parameter from profile will be overridden.\n")
+@click.option('--container', help="Name of the container. \
+If provided, then parameter from profile will be overridden.\n")
 @click.option('--bastion', help="Instance Id of the bastion node, \
 required for task running in FARGATE. \
 If provided, then parameter from profile will be overridden.\n")
@@ -30,7 +34,7 @@ If provided, then parameter from profile will be overridden.\n")
               help='Displays version number\n')
 @click.option('-v', '--verbose', is_flag=True, help='Enables verbose mode')
 @click.option('-d', '--debug', is_flag=True, help='Enables debug mode')
-def main(profile, awsprofile, cluster, service, task, bastion, cmd, all, version, verbose, debug):
+def main(profile, awsprofile, cluster, service, task, container, bastion, exec_cmd, cmd, all, version, verbose, debug):
     if version:
         print(__version__)
         exit(0)
@@ -57,6 +61,10 @@ def main(profile, awsprofile, cluster, service, task, bastion, cmd, all, version
         awsprofile = ecs_config.get_awsprofile(profile)
     if not task:
         task = ecs_config.get_task(profile)
+    if not exec_cmd:
+        exec_cmd = ecs_config.get_exec_cmd(profile)
+    if not container:
+        container = ecs_config.get_container(profile, exec_cmd)
     if task is None:
         if not service:
             service = ecs_config.get_service(profile)
@@ -65,16 +73,18 @@ def main(profile, awsprofile, cluster, service, task, bastion, cmd, all, version
     if not bastion:
         bastion = ecs_config.get_bastion(profile)
     if not cmd:
-        cmd = ecs_config.get_cmd(profile)
+        cmd = ecs_config.get_cmd(profile, exec_cmd)
     ssh_user = ecs_config.get_ssh_user(profile)
     ssh_key = ecs_config.get_ssh_key(profile)
     ssh_port = ecs_config.get_ssh_port(profile)
 
-    ecs = ECSHandler(awsprofile, cluster, service, task, bastion, logger)
-    instance_id, bastion_enabled = ecs.get_ec2_instance_id()
-
-    ssm = SSMHandler(awsprofile, instance_id, service, bastion_enabled, bastion, ssh_user, ssh_key, ssh_port, logger)
-    ssm.run(cmd, all)
+    ecs = ECSHandler(awsprofile, cluster, service, task, container, bastion, logger, cmd, exec_cmd)
+    if exec_cmd is not None:
+        ecs.exec()
+    else:
+        instance_id, bastion_enabled = ecs.get_ec2_instance_id()
+        ssm = SSMHandler(awsprofile, instance_id, service, bastion_enabled, bastion, ssh_user, ssh_key, ssh_port, logger)
+        ssm.run(cmd, all)
 
 
 if __name__ == "__main__":

@@ -26,3 +26,8 @@ History
 ------------------
 
 * Add support for specifying ssh user and path of the ssh key in bastion node
+
+3.0.0 (2022-06-29)
+------------------
+
+* Add support for ecs exec command
