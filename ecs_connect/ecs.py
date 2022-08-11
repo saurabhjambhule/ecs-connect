@@ -3,6 +3,8 @@
 import boto3
 import subprocess
 import re
+import inquirer
+import botocore
 
 class ECSHandler():
     """ ECS handler  """
@@ -17,7 +19,13 @@ class ECSHandler():
         self.cmd = cmd
         self.exec_cmd = exec_cmd
 
-        self.ecs_client = boto3.session.Session(profile_name=self.awsprofile).client('ecs')
+        try:
+            self.ecs_client = boto3.session.Session(profile_name=self.awsprofile).client('ecs')
+            test_connection = self.ecs_client.list_clusters(maxResults=1)
+        except botocore.exceptions.UnauthorizedSSOTokenError as e:
+            command = f'aws --profile {self.awsprofile} sso login'
+            self.logger.info("Running: %s", command)
+            subprocess.call(command, shell=True)
 
     def get_task_id(self):
         taskId = None
@@ -115,6 +123,91 @@ class ECSHandler():
         command = f'aws --profile {self.awsprofile} --region us-east-1 \
         ecs execute-command \
         --cluster {self.cluster} --task {task} --container {self.container} \
+        --command {self.exec_cmd} --interactive'
+        self.logger.info("Running: %s", command)
+
+        subprocess.call(command, shell=True)
+
+    def interactive(self):
+        cluster_response = self.ecs_client.list_clusters()
+        cluster_arns = cluster_response['clusterArns']
+        if not cluster_arns:
+            self.logger.error(
+                "There are no ECS clusters."
+            )
+            exit(1)
+        clusters = map( str, cluster_arns)
+        clusters = list(map( lambda x: re.sub(".*:cluster/", '', x), clusters))
+        questions = [
+            inquirer.List('cluster',
+                        message="Select Cluster",
+                        choices=clusters,
+                    ),
+        ]
+        answers = inquirer.prompt(questions)
+        self.cluster = answers["cluster"]
+
+        service_response = self.ecs_client.list_services(
+                cluster=self.cluster
+            )
+        service_arns = service_response['serviceArns']
+        if not service_arns:
+            self.logger.error(
+                "There are no ECS services in %s cluster.", self.cluster
+            )
+            exit(1)
+        services = map( str, service_arns)
+        services = list(map( lambda x: re.sub(".*:service/" + self.cluster + "/", "", x), services))
+        questions = [
+            inquirer.List('service',
+                        message="Select Service",
+                        choices=services,
+                    ),
+        ]
+        answers = inquirer.prompt(questions)
+        self.service = answers["service"]
+
+        task_response = self.ecs_client.list_tasks(
+                cluster=self.cluster,
+                serviceName=self.service,
+                desiredStatus='RUNNING'
+            )
+        task_arns = task_response['taskArns']
+        if not task_arns:
+            self.logger.error(
+                "There are no ECS tasks running in %s service.", self.service
+            )
+            exit(1)
+        tasks = map( str, task_arns)
+        tasks = list(map( lambda x: re.sub(".*:task/" + self.cluster + "/", "", x), tasks))
+        questions = [
+            inquirer.List('task',
+                        message="Select Task ",
+                        choices=tasks,
+                    ),
+        ]
+        answers = inquirer.prompt(questions)
+        self.task = answers["task"]
+
+        container_response = self.ecs_client.describe_tasks(
+                cluster=self.cluster,
+                tasks=[self.task]
+            )
+        containers = []
+        for name in container_response['tasks'][0]['containers']:
+            containers.append(name['name'])
+        questions = [
+            inquirer.List('container',
+                        message="Select Container",
+                        choices=containers,
+                    ),
+        ]
+        answers = inquirer.prompt(questions)
+        self.container = answers["container"]
+
+        command = f'aws --profile {self.awsprofile} --region us-east-1 \
+        ecs execute-command \
+        --cluster {self.cluster} --task {self.task} --container {self.container} \
         --command {self.exec_cmd} --interactive'
         self.logger.info("Running: %s", command)
 

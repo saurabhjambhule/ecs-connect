@@ -3,3 +3,4 @@ boto3>=1.16.9
 botocore>=1.19.9
 ConfigParser>=4.0.2
 websockets>=8.1
+inquirer>=2.10.0

@@ -31,3 +31,8 @@ History
 ------------------
 
 * Add support for ecs exec command
+
+3.1.0 (2022-08-11)
+------------------
+
+* Add support for interactive mode
