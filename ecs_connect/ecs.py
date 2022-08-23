@@ -129,7 +129,7 @@ class ECSHandler():
         subprocess.call(command, shell=True)
 
     def interactive(self):
-        cluster_response = self.ecs_client.list_clusters()
+        cluster_response = self.ecs_client.list_clusters(maxResults=100)
         cluster_arns = cluster_response['clusterArns']
         if not cluster_arns:
             self.logger.error(
@@ -148,7 +148,8 @@ class ECSHandler():
         self.cluster = answers["cluster"]
 
         service_response = self.ecs_client.list_services(
-                cluster=self.cluster
+                cluster=self.cluster,
+                maxResults=100
             )
         service_arns = service_response['serviceArns']
         if not service_arns:
@@ -170,7 +171,8 @@ class ECSHandler():
         task_response = self.ecs_client.list_tasks(
                 cluster=self.cluster,
                 serviceName=self.service,
-                desiredStatus='RUNNING'
+                desiredStatus='RUNNING',
+                maxResults=100
             )
         task_arns = task_response['taskArns']
         if not task_arns:

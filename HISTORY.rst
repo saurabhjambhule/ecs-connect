@@ -36,3 +36,8 @@ History
 ------------------
 
 * Add support for interactive mode
+
+3.1.1 (2022-08-23)
+------------------
+
+* Fix list returns limited results
