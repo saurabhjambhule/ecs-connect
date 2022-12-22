@@ -111,14 +111,14 @@ class ECSHandler():
         service_response = self.ecs_client.list_services(
             cluster=self.cluster
         )
-        service_regex = re.compile(".*" + self.service)
-        services = list(filter(service_regex.match, service_response['serviceArns']))
-        if not services:
-            self.logger.error(
-                "The <%s> service does not exists.", self.service
-            )
-            exit(1)
-
+        if self.task is None:
+            service_regex = re.compile(".*" + self.service)
+            services = list(filter(service_regex.match, service_response['serviceArns']))
+            if not services:
+                self.logger.error(
+                    "The <%s> service does not exists.", self.service
+                )
+                exit(1)
         task = self.get_task_id()
         command = f'aws --profile {self.awsprofile} --region us-east-1 \
         ecs execute-command \

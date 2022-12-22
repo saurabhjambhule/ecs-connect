@@ -41,3 +41,8 @@ History
 ------------------
 
 * Fix list returns limited results
+
+3.1.2 (2022-12-22)
+------------------
+
+* Fix exec command when task is given
