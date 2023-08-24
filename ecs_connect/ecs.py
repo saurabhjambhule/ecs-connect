@@ -28,7 +28,7 @@ class ECSHandler():
             subprocess.call(command, shell=True)
 
     def get_task_id(self):
-        taskId = None
+        task_id = None
         if self.task:
             response = self.ecs_client.list_tasks(
                 cluster=self.cluster,
@@ -37,7 +37,7 @@ class ECSHandler():
             )
             self.logger.info("Retrived task id using task and cluster name: %s"
                              % response['taskArns'][0])
-            taskId = response['taskArns'][0]
+            task_id = response['taskArns'][0]
         else:
             response = self.ecs_client.list_tasks(
                 cluster=self.cluster,
@@ -54,9 +54,23 @@ class ECSHandler():
             ### todo: address multiple task running for single service
             self.logger.info("Retrived task id using service and cluster name: %s"
                              % response['taskArns'][0])
-            taskId = response['taskArns'][0]
+            task_id = response['taskArns'][0]
 
-        return taskId
+        return task_id
+
+    def get_td_arn(self, task_id):
+        td_arn = None
+        response = self.ecs_client.describe_tasks(
+            cluster=self.cluster,
+            tasks=[
+                task_id
+            ]
+        )
+        td_arn = response['tasks'][0]['taskDefinitionArn']
+        self.logger.info("Retrived task definition arn: %s"
+                            % td_arn)
+
+        return td_arn
 
     def get_container_instance_id(self):
         task_id = self.get_task_id()
@@ -97,6 +111,58 @@ class ECSHandler():
         self.logger.info("Retrived ec2 instance id using container \
         instance id: %s" % response['containerInstances'][0]['ec2InstanceId'])
         return response['containerInstances'][0]['ec2InstanceId'], False
+
+    def get_logger(self, task_id):
+        td_arn = self.get_td_arn(task_id)
+
+        response = self.ecs_client.describe_task_definition(
+            taskDefinition=td_arn
+        )
+
+        for container in response['taskDefinition']['containerDefinitions']:
+            if container['name'] == self.container:
+                logs_group = container['logConfiguration']['options']['awslogs-group']
+                logs_stream_prefix = container['logConfiguration']['options']['awslogs-stream-prefix']
+                log_stream_names = logs_stream_prefix + '/' + self.container + '/' +  task_id.rsplit('/', 1)[-1]
+                return logs_group, log_stream_names
+        
+        self.logger.error(
+                "Unable to fetch logger configuration of task: %s", task_id
+            )
+        exit(1)
+
+    def logs(self, since, follow, format, log_filter):
+        cluster_response = self.ecs_client.list_clusters()
+        cluster_regex = re.compile(".*" + self.cluster)
+        clusters = list(filter(cluster_regex.match, cluster_response['clusterArns']))
+        if not clusters:
+            self.logger.error(
+                "The <%s> cluster does not exists.", self.cluster
+            )
+            exit(1)
+
+        service_response = self.ecs_client.list_services(
+            cluster=self.cluster
+        )
+        if self.task is None:
+            service_regex = re.compile(".*" + self.service)
+            services = list(filter(service_regex.match, service_response['serviceArns']))
+            if not services:
+                self.logger.error(
+                    "The <%s> service does not exists.", self.service
+                )
+                exit(1)
+        task = self.get_task_id()
+        logs_group, log_stream_names = self.get_logger(task)
+        command = f'aws --profile {self.awsprofile} --region us-east-1 \
+            logs tail {logs_group} --log-stream-names {log_stream_names} --since {since} --format {format}' 
+        if follow:
+            command = command + ' --follow' 
+        if log_filter is not None:
+            command = command + f' --filter {log_filter}'
+        self.logger.info("Running: %s", command)
+
+        subprocess.call(command, shell=True)
 
     def exec(self):
         cluster_response = self.ecs_client.list_clusters()

@@ -32,6 +32,12 @@ required for task running in FARGATE. \
 If provided, then parameter from profile will be overridden.\n")
 @click.option('--cmd', help="Initilization command to run. \
 If provided, then parameter from profile will be overridden.\n")
+@click.option('-l', '--logs', is_flag=True, help="fetch logs.")
+@click.option('--since', default='20m', help="From what time to begin displaying logs.\n")
+@click.option('-f', '--follow', is_flag=True,
+              help="Whether to continuously poll for new logs.\n")
+@click.option('--format', default='short', help="The format to display the logs.\n")
+@click.option('--filter', help="The filter pattern to use.\n")            
 @click.option('-a', '--all', is_flag=True,
               help='Displays all running containers\n')
 @click.option('-V', '--version', is_flag=True,
@@ -39,7 +45,8 @@ If provided, then parameter from profile will be overridden.\n")
 @click.option('-v', '--verbose', is_flag=True, help='Enables verbose mode')
 @click.option('-d', '--debug', is_flag=True, help='Enables debug mode')
 @click.option('-i', '--interactive', is_flag=True, help='Interactive mode')
-def main(profile, awsprofile, cluster, service, task, container, bastion, exec_cmd, cmd, all, version, verbose, debug, interactive):
+def main(profile, awsprofile, cluster, service, task, container, bastion, exec_cmd, cmd, 
+         logs, since, follow, format, filter, all, version, verbose, debug, interactive):
     if version:
         print(__version__)
         exit(0)
@@ -57,7 +64,7 @@ def main(profile, awsprofile, cluster, service, task, container, bastion, exec_c
         handler.setLevel(logging.DEBUG)
     logger.addHandler(handler)
 
-    if not interactive:
+    if not interactive or logs:
         ecs_config = ECSConfig(logger)
         if not profile:
             profile = "default"
@@ -86,7 +93,10 @@ def main(profile, awsprofile, cluster, service, task, container, bastion, exec_c
 
         ecs = ECSHandler(awsprofile, cluster, service, task, container, bastion, logger, cmd, exec_cmd)
         if exec_cmd is not None:
-            ecs.exec()
+            if logs:
+                ecs.logs(since, follow, format, filter)
+            else:
+                ecs.exec()
         else:
             instance_id, bastion_enabled = ecs.get_ec2_instance_id()
             ssm = SSMHandler(awsprofile, instance_id, service, bastion_enabled, bastion, ssh_user, ssh_key, ssh_port, logger)

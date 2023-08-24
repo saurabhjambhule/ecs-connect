@@ -46,3 +46,9 @@ History
 ------------------
 
 * Fix exec command when task is given
+
+
+3.2.2 (2022-05-26)
+------------------
+
+* Support for getting logs of ecs task
